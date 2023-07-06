@@ -1,0 +1,333 @@
+Sub VerificarECI()
+
+    Dim UltLinha As Integer
+    Dim Aux As Boolean
+    
+    Application.ScreenUpdating = False
+    
+    UltLinha = Planilha2.Range("B1000").End(xlUp).Row
+    
+    Aux = False
+    
+    With Planilha2
+    
+        For i = 6 To UltLinha
+        
+            If .Cells(i, "J").Value = "" Then
+            
+                Aux = True
+                
+                .Cells(i, "L").Value = .Cells(i, "E").Value
+                
+                .Cells(i, "M").Value = .Cells(i, "F").Value
+                
+                .Cells(i, "N").Value = .Cells(i, "I").Value
+            
+            End If
+        
+        Next i
+        
+        If Aux = False Then
+            
+            MsgBox "Não há desenhos para atualizar!", vbInformation
+            
+            Exit Sub
+            
+        End If
+        
+        .Range("L6:N" & UltLinha).Select
+       Selection.SpecialCells(xlCellTypeBlanks).Select
+        Selection.Delete Shift:=xlUp
+        
+        Call AjusteJPG
+        
+        Call ExportarAreaParaJPG
+        
+        Call Enviar_email
+
+        Planilha2.Range("L6:N" & UltLinha).ClearContents
+        
+        Planilha2.Range("L6:N" & UltLinha).ClearFormats
+        
+        .Range("B5").Select
+
+    End With
+    
+    Application.ScreenUpdating = True
+    
+End Sub
+
+Sub AjusteJPG()
+    
+        Dim UltLinha As Integer
+        
+        UltLinha = Planilha2.Range("L1000").End(xlUp).Row
+        
+        Planilha2.Range("L6:L" & UltLinha).InsertIndent 1
+        
+        With Planilha2.Range("M6:N" & UltLinha)
+        
+            .HorizontalAlignment = xlCenter
+            .VerticalAlignment = xlCenter
+            .WrapText = False
+            .Orientation = 0
+            .AddIndent = False
+            .IndentLevel = 0
+            .ShrinkToFit = False
+            .ReadingOrder = xlContext
+            .MergeCells = False
+            
+        End With
+        
+        With Planilha2.Range("N6:N" & UltLinha).Interior
+        
+            .Pattern = xlSolid
+            .PatternColorIndex = xlAutomatic
+            .Color = 255
+            .TintAndShade = 0
+            .PatternTintAndShade = 0
+            
+        End With
+        
+        With Planilha2.Range("N6:N" & UltLinha).Font
+        
+            .ThemeColor = xlThemeColorDark1
+            .TintAndShade = 0
+            
+        End With
+        
+        With Planilha2.Range("L6:N" & UltLinha).Borders(xlEdgeLeft)
+        
+            .LineStyle = xlContinuous
+            .ColorIndex = xlAutomatic
+            .TintAndShade = 0
+            .Weight = xlMedium
+            
+        End With
+        
+        With Planilha2.Range("L6:N" & UltLinha).Borders(xlEdgeTop)
+        
+            .LineStyle = xlContinuous
+            .ColorIndex = xlAutomatic
+            .TintAndShade = 0
+            .Weight = xlMedium
+            
+        End With
+        
+        With Planilha2.Range("L6:N" & UltLinha).Borders(xlEdgeBottom)
+        
+            .LineStyle = xlContinuous
+            .ColorIndex = xlAutomatic
+            .TintAndShade = 0
+            .Weight = xlMedium
+            
+        End With
+        
+        With Planilha2.Range("L6:N" & UltLinha).Borders(xlEdgeRight)
+        
+            .LineStyle = xlContinuous
+            .ColorIndex = xlAutomatic
+            .TintAndShade = 0
+            .Weight = xlMedium
+            
+        End With
+        
+        With Planilha2.Range("L6:N" & UltLinha).Borders(xlInsideVertical)
+        
+            .LineStyle = xlContinuous
+            .ColorIndex = xlAutomatic
+            .TintAndShade = 0
+            .Weight = xlThin
+            
+        End With
+        
+        With Planilha2.Range("L6:N" & UltLinha).Borders(xlInsideHorizontal)
+        
+            .LineStyle = xlContinuous
+            .ColorIndex = xlAutomatic
+            .TintAndShade = 0
+            .Weight = xlThin
+            
+        End With
+        
+        Planilha2.Range("L6:N" & UltLinha).Select
+    
+End Sub
+
+Sub ExportarAreaParaJPG()
+
+' Salvar planilha.
+'ActiveWorkbook.Save
+    
+' Seleciona o intervalo de células a serem enviadas por email.
+
+'Planilha2.Range("A2:P48").Select
+
+Dim tmpSheet As Worksheet
+Dim tmpChart As Chart
+Dim tmpImg As Object
+Dim img As String
+
+On Error GoTo erro
+
+Selection.CopyPicture Appearance:=xlPrinter, Format:=xlPicture
+
+'Application.ScreenUpdating = False
+
+  Set tmpSheet = Worksheets.Add
+  Charts.Add
+  ActiveChart.Location Where:=xlLocationAsObject, Name:=tmpSheet.Name
+  Set tmpChart = ActiveChart
+  With tmpChart
+    .Paste
+    Set tmpImg = Selection
+    With .Parent
+      .Height = 175
+      .Width = 325
+    End With
+  End With
+
+'img = "imagem_print.jpg"
+
+img = "P:\07_PE\7. Users\Frank\Auxiliar\imagem_print.jpg"
+
+tmpChart.Export Filename:=img, FilterName:="JPG"
+
+Application.DisplayAlerts = False
+tmpSheet.Delete
+Application.DisplayAlerts = True
+
+'Application.ScreenUpdating = True
+  'MsgBox "Imagem exportada para o ficheiro:" & img, _
+         vbInformation, _
+         "Exportar para JPG"
+GoTo fim
+
+erro:
+MsgBox "Erro: " & Err.Description, _
+vbCritical, _
+"Erro: " & Err.Number
+
+fim:
+Set tmpSheet = Nothing
+Set tmpChart = Nothing
+Set tmpImg = Nothing
+
+End Sub
+
+
+
+Sub lsLigarTelaCheia()
+    'Oculta todas as guias de menu
+    Application.ExecuteExcel4Macro "SHOW.TOOLBAR(""Ribbon"",False)"
+    
+    'Ocultar barra de fórmulas
+    Application.DisplayFormulaBar = False
+    
+    'Ocultar barra de status, disposta ao final da planilha
+    Application.DisplayStatusBar = False
+    
+    'Alterar o nome do Excel
+    'Application.Caption = "GESTÃO FINANCEIRA DO ALMOXARIFADO DE COMPRAS E MANUTENÇÃO"
+    
+    With ActiveWindow
+    
+         Application.DisplayScrollBars = False
+        
+        'Ocultar guias das planilhas
+        .DisplayWorkbookTabs = False
+        
+        'Oculta os títulos de linha e coluna
+        .DisplayHeadings = False
+        
+        'Oculta valores zero na planilha
+        '.DisplayZeros = True
+        
+        'Oculta as linhas de grade da planilha
+        .DisplayGridlines = False
+        
+    End With
+End Sub
+
+Sub lsDesligarTelaCheia()
+    'Oculta todas as guias de menu
+    Application.ExecuteExcel4Macro "SHOW.TOOLBAR(""Ribbon"",True)"
+    
+    'Ocultar barra de fórmulas
+    Application.DisplayFormulaBar = True
+    
+    'Ocultar barra de status, disposta ao final da planilha
+    Application.DisplayStatusBar = True
+    
+    'Alterar o nome do Excel
+    'Application.Caption = " FERRAMENTAS DE USINAGEM"
+    
+    With ActiveWindow
+    
+         Application.DisplayScrollBars = True
+        
+        'Ocultar guias das planilhas
+        .DisplayWorkbookTabs = True
+        
+        'Oculta os títulos de linha e coluna
+        .DisplayHeadings = True
+        
+        'Oculta valores zero na planilha
+        '.DisplayZeros = True
+        
+        'Oculta as linhas de grade da planilha
+        .DisplayGridlines = False
+    End With
+End Sub
+
+Sub Enviar_email()
+'Senha1 = "q1w2e3"
+
+'Resposta = InputBox("Insira a Senha")
+
+'If Resposta <> Senha1 Then
+
+'MsgBox "Senha Incorreta", , "Atenção"
+
+'Exit Sub
+
+'End If
+
+    
+    'ActiveWorkbook.Save ' Salvar planilha.
+
+    Set objeto_outlook = CreateObject("Outlook.Application")
+    
+    Set Email = objeto_outlook.createitem(0)
+    
+    With Email
+    
+        'Sheets("ENVIAR E-MAIL").Activate
+         
+        .To = "aal_eng_unit_dc@aisin.com.br" 'email para quem será enviado
+    
+        '.cc = Cells(3, 1).Value 'email em cópia
+    
+        .Subject = "Desenhos para atualizar" 'Assunto
+    
+        .htmlbody = "Estimados senhores," & "<br><br>" & "Abaixo está uma tabela indicando quais desenho(s) deve(m) ser atualizado(s), por favor verificar!" & "<br><br>" & "Solicitamos sua atenção!!!" & "<br><br>" & "<img src='P:\07_PE\7. Users\Frank\Auxiliar\imagem_print.jpg' > "
+        'htmlbody é o corpo do email
+        
+        '<br> é pular para próximo parágrafo
+        
+        Caminho = Application.ActiveWorkbook.FullName
+        
+        .Attachments.Add Caminho
+        
+        .display
+        
+        'display mostra o e-mail, caso queira que envie o email direto, troque "display" por "send"
+        
+        'Sheets("Índice").Select
+        
+    End With
+
+End Sub
+
+
+
