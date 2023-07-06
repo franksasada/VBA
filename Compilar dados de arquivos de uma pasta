@@ -1,0 +1,52 @@
+Sub cpk()
+
+Dim pasta As Object
+
+Dim caminho As String
+
+Application.ScreenUpdating = False
+
+caminho = "P:\TEMPORARIO\massanori\Espectrometro\1º TURNO  (A)\FORNO FUSÃO\2020\10- OUTUBRO\"
+
+Set pasta = CreateObject("Scripting.FileSystemObject").getfolder(caminho)
+
+Set resumo = ThisWorkbook.Sheets(1)
+
+For Each arquivo In pasta.Files
+
+    If InStr(arquivo.Name, "PADRÃO") = 0 Then
+        linha = Range("A100000").End(xlUp).Row + 1
+        
+        Set planilha = Workbooks.Open(caminho & arquivo.Name)
+        
+        resumo.Cells(linha, 1).Value = planilha.Sheets(1).Range("C9").Value
+        
+        coluna = 2
+        
+        For i = 2 To 8
+        
+        resumo.Cells(linha, i).Value = WorksheetFunction.Average(planilha.Sheets(1).Cells(28, coluna), planilha.Sheets(1).Cells(28, coluna + 1), planilha.Sheets(1).Cells(28, coluna + 2), planilha.Sheets(1).Cells(28, coluna + 3))
+        
+        coluna = coluna + 4
+        
+        Next
+        
+        coluna = 2
+        
+        For i = 9 To 14
+        
+        resumo.Cells(linha, i).Value = WorksheetFunction.Average(planilha.Sheets(1).Cells(33, coluna), planilha.Sheets(1).Cells(33, coluna + 1), planilha.Sheets(1).Cells(33, coluna + 2), planilha.Sheets(1).Cells(33, coluna + 3))
+        
+        coluna = coluna + 4
+        
+        Next
+    
+        planilha.Close
+        
+    End If
+
+Next
+
+Application.ScreenUpdating = False
+
+End Sub
