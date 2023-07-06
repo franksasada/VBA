@@ -1,0 +1,126 @@
+Sub DateCompilation()
+
+Dim pasta As Object
+Dim caminho As String
+Dim modelo As String
+Dim ultmodelo As String
+Dim ultmaq As String
+Dim dcm As String
+Dim filter As ListObject
+Dim maq As Integer
+Dim linha As Integer
+Dim ultlinha As Integer
+Dim ColunaMaq As Integer
+Dim ColunaMod As Integer
+
+Application.ScreenUpdating = False
+Application.Calculation = xlManual
+Application.DisplayAlerts = False
+
+caminho = "P:\29_REGISTRO_PRODUCAO\00-Registro de Produção\2023_Relatorio Diario de Produção - DIE CASTING ( NOVO DOC 5).xlsm"
+
+Set planilha = Workbooks.Open(caminho)
+
+Set resumo = ThisWorkbook.Sheets("TabelaBase")
+
+planilha.Sheets("#1-Apontamento").Visible = True
+
+planilha.Sheets("#1-Apontamento").Activate
+
+planilha.Sheets("#1-Apontamento").Range("B3").Activate
+
+Set filter = Sheets("#1-Apontamento").ListObjects(1)
+
+filter.AutoFilter.ShowAllData
+
+ultlinha = planilha.Sheets("#1-Apontamento").Range("B1000000").End(xlUp).Row
+
+ultmodelo = planilha.Sheets("#1-Apontamento").Range("GV1000000").End(xlUp).Value
+
+ultmaq = planilha.Sheets("#1-Apontamento").Range("HG1000000").End(xlUp).Value
+
+datahoje = Date
+
+For i = 4 To 16
+    
+    modelo = resumo.Cells(i, 2).Value
+    
+    ColunaMod = Rows(3).Find("Modelo Peça").Column - 1
+    
+    ActiveSheet.ListObjects("TABELA_SEAT2").Range.AutoFilter Field:=ColunaMod, Criteria1:=modelo
+
+    For j = 3 To 6
+    
+        On Error Resume Next
+        
+        'ActiveSheet.ListObjects("TABELA_SEAT2").Range.AutoFilter Field:=203, Criteria1:=modelo
+    
+        maq = j - 2
+    
+        dcm = "DC-422" & maq
+        
+        ColunaMaq = Rows(3).Find("Linha").Column - 1
+    
+        ActiveSheet.ListObjects("TABELA_SEAT2").Range.AutoFilter Field:=ColunaMaq, Criteria1:=dcm
+        
+        linha = planilha.Sheets("#1-Apontamento").Range("B3").End(xlDown).Row
+        
+        If ultlinha <> linha Then
+        
+            resumo.Cells(i, j).Value = planilha.Sheets("#1-Apontamento").Range("B3").End(xlDown).Value - datahoje
+        
+        ElseIf ultmodelo = modelo And ultmaq = dcm Then
+        
+            resumo.Cells(i, j).Value = planilha.Sheets("#1-Apontamento").Range("B3").End(xlDown).Value - datahoje
+    
+        End If
+        
+        ActiveSheet.ListObjects("TABELA_SEAT2").Range.AutoFilter Field:=214
+    
+    Next j
+
+        For j = 7 To 8
+        
+        'ActiveSheet.ListObjects("TABELA_SEAT2").Range.AutoFilter Field:=203, Criteria1:=modelo
+    
+        On Error Resume Next
+    
+        maq = j - 6
+    
+        dcm = "DC-421" & maq
+        
+        ColunaMaq = Rows(3).Find("Linha").Column - 1
+    
+        ActiveSheet.ListObjects("TABELA_SEAT2").Range.AutoFilter Field:=214, Criteria1:=dcm
+        
+        linha = planilha.Sheets("#1-Apontamento").Range("B3").End(xlDown).Row
+        
+        If ultlinha <> linha Then
+        
+            resumo.Cells(i, j).Value = planilha.Sheets("#1-Apontamento").Range("B3").End(xlDown).Value - datahoje
+        
+        ElseIf ultmodelo = modelo And ultmaq = dcm Then
+        
+            resumo.Cells(i, j).Value = planilha.Sheets("#1-Apontamento").Range("B3").End(xlDown).Value - datahoje
+    
+        End If
+
+        ActiveSheet.ListObjects("TABELA_SEAT2").Range.AutoFilter Field:=214
+    
+    Next j
+
+Next i
+
+planilha.Close
+
+Application.DisplayAlerts = True
+
+Set planilha = Nothing
+Set resumo = Nothing
+Set filter = Nothing
+
+Application.ScreenUpdating = True
+Application.Calculation = xlAutomatic
+
+
+End Sub
