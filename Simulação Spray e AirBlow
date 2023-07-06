@@ -1,0 +1,197 @@
+Simulação de spray e ar do robô
+
+Public Declare PtrSafe Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As LongPtr)
+
+Sub spray()
+
+If Sheets("FIXO").Range("BK10").Value = "" Then
+   
+   x1 = ActiveSheet.Shapes("Pos 1").Left + 8.5
+   y1 = ActiveSheet.Shapes("Pos 1").Top + 8.5
+
+   ActiveSheet.Shapes.AddShape(msoShapeOval, x1 - 25, y1 - 25, 50, 50).Name = "Robô1"
+   
+   Sheets("FIXO").Range("BK10").Value = 1
+   
+    With ActiveSheet.Shapes("Robô1").Fill
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorAccent1
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = 0.4
+        .Transparency = 0.4
+        .Solid
+    End With
+    With ActiveSheet.Shapes("Robô1").Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorAccent1
+        .ForeColor.TintAndShade = -0.5
+        .ForeColor.Brightness = 0
+        .Transparency = 0.7
+    End With
+    
+    linha = 52
+
+    DoEvents
+    
+    Start = Timer
+
+    For pos = 1 To 9
+        
+        espera = Cells(linha, 67).Value * 1000
+        
+        Sleep espera
+        
+        speed = 5000000 / Cells(linha, 66).Value
+        
+        x2 = ActiveSheet.Shapes("Pos " & pos + 1).Left + 8.5
+        y2 = ActiveSheet.Shapes("Pos " & pos + 1).Top + 8.5
+        
+        d = ((((x2 - x1) ^ 2) + ((y2 - y1) ^ 2)) ^ 0.5) / 20
+        
+        d = Round(d) * 2
+        
+        stepx = (x2 - x1) / d
+
+        stepy = (y2 - y1) / d
+        
+        For t = 1 To d
+    
+            ActiveSheet.Shapes("Robô1").IncrementLeft stepx
+            
+            ActiveSheet.Shapes("Robô1").IncrementTop stepy
+        
+            DoEvents
+            
+            Sleep (700000 / (Cells(linha + 1, 66).Value * 10))
+
+        Next
+    
+        x1 = x2
+        
+        y1 = y2
+        
+        linha = linha + 1
+
+    Next
+   
+        tempo = Timer - Start
+        
+        MsgBox ("CT: " & tempo)
+
+     ActiveSheet.Shapes("Robô1").Delete
+     
+     Sheets("FIXO").Range("BK10").Value = ""
+     
+End If
+
+End Sub
+
+Sub airblow()
+
+'    ActiveSheet.Shapes.AddShape(msoShapeRectangle, 100, 25, 80, 40).Select
+'    ActiveSheet.Shapes.AddShape(msoShapeRectangle, 250, 100, 80, 40).Select
+   x1 = ActiveSheet.Shapes("Pos 10").Left + 670
+   y1 = ActiveSheet.Shapes("Pos 10").Top + 14
+    
+   ActiveSheet.Shapes.AddShape(msoShapeOval, x1 - 25, y1 - 25, 50, 50).Name = "Robô2"
+    With ActiveSheet.Shapes("Robô2").Fill
+        .Visible = msoTrue
+        .ForeColor.RGB = RGB(255, 255, 0)
+        .ForeColor.TintAndShade = 0
+        .ForeColor.Brightness = 0.4
+        .Transparency = 0.4
+        .Solid
+    End With
+    With ActiveSheet.Shapes("Robô2").Line
+        .Visible = msoTrue
+        .ForeColor.ObjectThemeColor = msoThemeColorAccent1
+        .ForeColor.TintAndShade = -0.5
+        .ForeColor.Brightness = 0
+        .Transparency = 0.7
+    End With
+    
+    linha = 52
+    
+    Start = Timer
+
+    For pos = 100 To 108
+    
+'        Start = Timer
+        
+'        speed = 5000000 / Cells(linha, 70).Value
+        
+        x2 = ActiveSheet.Shapes("Pos " & pos + 1).Left
+        y2 = ActiveSheet.Shapes("Pos " & pos + 1).Top
+        
+        If x2 > x1 Then
+        
+            auxx = 8
+            
+        Else
+        
+            auxx = -8
+            
+        End If
+        
+        If y2 > y1 Then
+        
+            auxy = 8
+            
+        Else
+        
+            auxy = -8
+            
+        End If
+        
+        d = ((((x2 - x1) ^ 2) + ((y2 - y1) ^ 2)) ^ 0.5) / 20
+        
+        stepx = ((x2 + auxx) - x1) / d
+
+        stepy = ((y2 + auxy) - y1) / d
+        
+        
+        For t = 1 To d
+    
+            ActiveSheet.Shapes("Robô2").IncrementLeft stepx
+            
+            ActiveSheet.Shapes("Robô2").IncrementTop stepy
+        
+            DoEvents
+            
+             Sleep (25000 / (Cells(linha, 70).Value) * 3)
+            
+'
+'            For w1 = 1 To 100
+'                For w2 = 1 To speed
+'                Next
+'            Next
+'
+        
+        
+        Next
+    
+        x1 = x2
+        
+        y1 = y2
+    
+'        tempo = Timer - Start
+        
+'        Cells(29 + pos, 26).Value = tempo
+
+        espera = Cells(linha, 71).Value * 1000
+        
+        Sleep espera
+        
+        linha = linha + 1
+
+    Next
+'
+   tempo = Timer - Start
+'
+    MsgBox ("CT: " & tempo)
+'
+     ActiveSheet.Shapes("Robô2").Delete
+
+End Sub
+
+
